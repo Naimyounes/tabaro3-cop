@@ -567,9 +567,9 @@ if __name__ == '__main__':
 # لا تقم بتغيير اسم المتغير app لأن IIS سيبحث عنه
 
 # إضافة دعم Firebase Functions
-from firebase_functions import https_fn
+#from firebase_functions import https_fn
 
-@https_fn.on_request()
+#@https_fn.on_request()
 def app_function(request):
     with app.app_context():
         db.create_all()
