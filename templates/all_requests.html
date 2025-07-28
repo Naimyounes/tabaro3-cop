@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">جميع طلبات الدم</h3>
+            </div>
+            <div class="card-body">
+                {% if requests %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>فصيلة الدم</th>
+                                <th>المدينة</th>
+                                <th>المستشفى</th>
+                                <th>الوحدات</th>
+                                <th>التاريخ</th>
+                                <th>الحالة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in requests %}
+                            <tr>
+                                <td>{{ request.blood_type }}</td>
+                                <td>{{ request.city }}</td>
+                                <td>{{ request.hospital }}</td>
+                                <td>{{ request.units_needed }}</td>
+                                <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if request.is_urgent %}
+                                    <span class="badge bg-danger">طارئ</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">عادي</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('view_request', request_id=request.id) }}" class="btn btn-sm btn-info">عرض</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center">لا توجد طلبات حالياً</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

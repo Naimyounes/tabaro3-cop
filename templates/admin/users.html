@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">إدارة المستخدمين</h1>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary mb-3">العودة للوحة التحكم</a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            قائمة المستخدمين
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>الاسم الكامل</th>
+                            <th>اسم المستخدم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>رقم الهاتف</th>
+                            <th>فصيلة الدم</th>
+                            <th>الولاية</th>
+                            <th>الدائرة</th>
+                            <th>متاح للتبرع</th>
+                            <th>تاريخ التسجيل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.full_name }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone }}</td>
+                            <td><span class="blood-type-badge">{{ user.blood_type }}</span></td>
+                            <td>{{ user.state }}</td>
+                            <td>{{ user.city }}</td>
+                            <td>{{ "نعم" if user.is_available else "لا" }}</td>
+                            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

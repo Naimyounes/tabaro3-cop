@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">لوحة تحكم المسؤول</h1>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">إجمالي المستخدمين</h5>
+                    <p class="card-text display-4">{{ users|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">إجمالي طلبات الدم</h5>
+                    <p class="card-text display-4">{{ requests|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">طلبات نشطة</h5>
+                    <p class="card-text display-4">{{ requests|selectattr('is_fulfilled', 'equalto', false)|list|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">طلبات مكتملة</h5>
+                    <p class="card-text display-4">{{ requests|selectattr('is_fulfilled', 'equalto', true)|list|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">إدارة المستخدمين</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('create_admin') }}" class="btn btn-primary mb-3">إنشاء حساب مسؤول جديد</a>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>الاسم الكامل</th>
+                                    <th>اسم المستخدم</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>فصيلة الدم</th>
+                                    <th>الولاية</th>
+                                    <th>متبرع</th>
+                                    <th>مسؤول</th>
+                                    <th>تاريخ التسجيل</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.full_name }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.blood_type }}</td>
+                                    <td>{{ user.city }}</td>
+                                    <td>{% if user.is_donor %}نعم{% else %}لا{% endif %}</td>
+                                    <td>{% if user.is_admin %}نعم{% else %}لا{% endif %}</td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" class="btn btn-sm btn-warning">تعديل</a>
+                                        {% if user.id != session['user_id'] %}
+                                        <a href="{{ url_for('admin_delete_user', user_id=user.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا المستخدم؟')">حذف</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">طلبات الدم</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>المريض</th>
+                                    <th>فصيلة الدم</th>
+                                    <th>الوحدات</th>
+                                    <th>المستشفى</th>
+                                    <th>الولاية</th>
+                                    <th>طارئ</th>
+                                    <th>الحالة</th>
+                                    <th>تاريخ الطلب</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in requests %}
+                                <tr>
+                                    <td>{{ request.requester.full_name }}</td>
+                                    <td>{{ request.blood_type }}</td>
+                                    <td>{{ request.units_needed }}</td>
+                                    <td>{{ request.hospital }}</td>
+                                    <td>{{ request.city }}</td>
+                                    <td>{% if request.is_urgent %}نعم{% else %}لا{% endif %}</td>
+                                    <td>{% if request.is_fulfilled %}مكتمل{% else %}نشط{% endif %}</td>
+                                    <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_edit_request', request_id=request.id) }}" class="btn btn-sm btn-warning">تعديل</a>
+                                        <a href="{{ url_for('admin_delete_request', request_id=request.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا الطلب؟')">حذف</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- For the stat cards at the top of the dashboard -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card dashboard-stat-card">
+                <div class="card-body text-center">
+                    <h3 class="card-title">المستخدمين</h3>
+                    <p class="display-4">{{ users|length }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Other stat cards... -->
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">بلاغات المتبرعين</h5>
+                </div>
+                <div class="card-body">
+                    {% if reports %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>المتبرع</th>
+                                    <th>نوع المشكلة</th>
+                                    <th>التفاصيل</th>
+                                    <th>اسم المبلغ</th>
+                                    <th>معلومات الاتصال</th>
+                                    <th>تاريخ البلاغ</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr class="{% if not report.is_resolved %}table-warning{% endif %}">
+                                    <td>{{ report.donor.full_name }}</td>
+                                    <td>
+                                        {% if report.report_type == 'incorrect_info' %}
+                                            معلومات غير صحيحة
+                                        {% elif report.report_type == 'unavailable' %}
+                                            المتبرع غير متاح
+                                        {% elif report.report_type == 'inappropriate' %}
+                                            سلوك غير لائق
+                                        {% else %}
+                                            مشكلة أخرى
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ report.report_details }}</td>
+                                    <td>{{ report.reporter_name or 'غير محدد' }}</td>
+                                    <td>{{ report.reporter_contact or 'غير محدد' }}</td>
+                                    <td>{{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{% if report.is_resolved %}تم الحل{% else %}قيد المراجعة{% endif %}</td>
+                                    <td>
+                                        {% if not report.is_resolved %}
+                                        <a href="{{ url_for('resolve_report', report_id=report.id) }}" class="btn btn-sm btn-success">تحديد كمحلول</a>
+                                        {% endif %}
+                                        <a href="{{ url_for('admin_edit_user', user_id=report.donor.id) }}" class="btn btn-sm btn-warning">تعديل المتبرع</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">لا توجد بلاغات حالياً</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

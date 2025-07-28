@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">إدارة طلبات الدم</h1>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary mb-3">العودة للوحة التحكم</a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            قائمة طلبات الدم
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>المريض</th>
+                            <th>فصيلة الدم</th>
+                            <th>المستشفى</th>
+                            <th>الولاية</th>
+                            <th>الدائرة</th>
+                            <th>رقم الهاتف</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الطلب</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in blood_requests %}
+                        <tr>
+                            <td>{{ request.patient_name }}</td>
+                            <td><span class="blood-type-badge">{{ request.blood_type }}</span></td>
+                            <td>{{ request.hospital }}</td>
+                            <td>{{ request.state }}</td>
+                            <td>{{ request.city }}</td>
+                            <td>{{ request.phone }}</td>
+                            <td>{{ "مفتوح" if request.is_open else "مغلق" }}</td>
+                            <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

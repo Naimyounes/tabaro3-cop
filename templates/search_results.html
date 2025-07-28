@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}نتائج البحث{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">نتائج البحث</h3>
+        </div>
+        <div class="card-body">
+            {% if donors %}
+            <p>تم العثور على {{ donors|length }} متبرع</p>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>فصيلة الدم</th>
+                            <th>المدينة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donor in donors %}
+                        <tr>
+                            <td>{{ donor.full_name }}</td>
+                            <td>{{ donor.blood_type }}</td>
+                            <td>{{ donor.city }}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#contactModal{{ donor.id }}">اتصال</a>
+                                <a href="#" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#reportModal{{ donor.id }}">إبلاغ عن مشكلة</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                لم يتم العثور على متبرعين مطابقين لمعايير البحث.
+            </div>
+            {% endif %}
+            <div class="mt-3">
+                <a href="{{ url_for('search') }}" class="btn btn-primary">بحث جديد</a>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">العودة للصفحة الرئيسية</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact and Report Modals -->
+{% for donor in donors %}
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal{{ donor.id }}" tabindex="-1" aria-labelledby="contactModalLabel{{ donor.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel{{ donor.id }}">معلومات الاتصال بالمتبرع</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>الاسم:</strong> {{ donor.full_name }}</p>
+                <p><strong>رقم الهاتف:</strong> {{ donor.phone }}</p>
+                <p><strong>البريد الإلكتروني:</strong> {{ donor.email }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal{{ donor.id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ donor.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="reportModalLabel{{ donor.id }}">الإبلاغ عن مشكلة مع متبرع</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('report_donor', donor_id=donor.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="report_type{{ donor.id }}" class="form-label">نوع المشكلة</label>
+                        <select class="form-select" id="report_type{{ donor.id }}" name="report_type" required>
+                            <option value="">اختر نوع المشكلة</option>
+                            <option value="incorrect_info">معلومات غير صحيحة</option>
+                            <option value="unavailable">المتبرع غير متاح</option>
+                            <option value="inappropriate">سلوك غير لائق</option>
+                            <option value="other">مشكلة أخرى</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reporter_name{{ donor.id }}" class="form-label">اسمك (اختياري)</label>
+                        <input type="text" class="form-control" id="reporter_name{{ donor.id }}" name="reporter_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="reporter_contact{{ donor.id }}" class="form-label">معلومات الاتصال بك (اختياري)</label>
+                        <input type="text" class="form-control" id="reporter_contact{{ donor.id }}" name="reporter_contact">
+                    </div>
+                    <div class="mb-3">
+                        <label for="report_details{{ donor.id }}" class="form-label">تفاصيل المشكلة</label>
+                        <textarea class="form-control" id="report_details{{ donor.id }}" name="report_details" rows="3" required></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning">إرسال البلاغ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

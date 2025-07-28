@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h3 class="mb-0">الإبلاغ عن مشكلة مع متبرع</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        أنت تقوم بالإبلاغ عن مشكلة متعلقة بالمتبرع: <strong>{{ donor.full_name }}</strong>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="report_type" class="form-label">نوع المشكلة</label>
+                            <select class="form-select" id="report_type" name="report_type" required>
+                                <option value="">اختر نوع المشكلة</option>
+                                <option value="incorrect_info">معلومات غير صحيحة</option>
+                                <option value="unavailable">المتبرع غير متاح</option>
+                                <option value="inappropriate">سلوك غير لائق</option>
+                                <option value="other">مشكلة أخرى</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="report_details" class="form-label">تفاصيل المشكلة</label>
+                            <textarea class="form-control" id="report_details" name="report_details" rows="5" required></textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning">إرسال البلاغ</button>
+                            <a href="{{ url_for('search') }}" class="btn btn-secondary">إلغاء</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

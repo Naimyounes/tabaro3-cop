@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">تعديل البيانات الشخصية</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">اسم المستخدم</label>
+                            <input type="text" class="form-control" id="username" value="{{ user.username }}" disabled>
+                            <small class="text-muted">لا يمكن تغيير اسم المستخدم</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                            <small class="text-muted">لا يمكن تغيير البريد الإلكتروني</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">الاسم الكامل</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">رقم الهاتف</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ user.phone }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="blood_type" class="form-label">فصيلة الدم</label>
+                            <select class="form-select" id="blood_type" name="blood_type" required>
+                                <option value="A+" {% if user.blood_type == 'A+' %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if user.blood_type == 'A-' %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if user.blood_type == 'B+' %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if user.blood_type == 'B-' %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if user.blood_type == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if user.blood_type == 'AB-' %}selected{% endif %}>AB-</option>
+                                <option value="O+" {% if user.blood_type == 'O+' %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if user.blood_type == 'O-' %}selected{% endif %}>O-</option>
+                            </select>
+                        </div>
+                        <!-- Replace the state and city selection part with this -->
+                        <div class="mb-3">
+                            <label for="state" class="form-label">الولاية</label>
+                            <select class="form-select" id="state" name="state" required>
+                                <option value="">اختر الولاية</option>
+                                <!-- States will be populated by algeria_cities.js -->
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="city" class="form-label">الدائرة</label>
+                            <select class="form-select" id="city" name="city" required>
+                                <option value="" selected disabled>اختر الدائرة</option>
+                                <!-- سيتم ملؤها بواسطة JavaScript عند اختيار الولاية -->
+                            </select>
+                        </div>
+                        <!-- Removed the text input field for district -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_donor" name="is_donor" {% if user.is_donor %}checked{% endif %}>
+                            <label class="form-check-label" for="is_donor">متبرع بالدم</label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">كلمة المرور الجديدة (اتركها فارغة إذا لم ترغب في تغييرها)</label>
+                            <input type="password" class="form-control" id="password" name="password">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">إلغاء</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- في نهاية الملف، قبل نهاية block content -->
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/algeria_cities.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stateSelect = document.getElementById('state');
+        const citySelect = document.getElementById('city');
+        
+        // Clear any existing options first (except the first one)
+        while (stateSelect.options.length > 1) {
+            stateSelect.remove(1);
+        }
+        
+        // تعبئة قائمة الولايات
+        for (const state in algeriaStatesAndCities) {
+            const option = document.createElement('option');
+            option.value = state;
+            option.textContent = state;
+            stateSelect.appendChild(option);
+        }
+        
+        // تحديد الولاية الحالية للمستخدم إذا كانت موجودة
+        if ('{{ user.city }}' && '{{ user.city }}' !== 'None' && '{{ user.city }}' !== 'N/A') {
+            stateSelect.value = '{{ user.city }}';
+            
+            // تحديث قائمة الدوائر بناءً على الولاية المحددة
+            updateCities('{{ user.city }}');
+            
+            // تحديد الدائرة الحالية للمستخدم إذا كانت موجودة
+            if ('{{ user.district }}' && '{{ user.district }}' !== 'None' && '{{ user.district }}' !== 'N/A') {
+                citySelect.value = '{{ user.district }}';
+            }
+        }
+        
+        // تحديث قائمة الدوائر عند اختيار الولاية
+        stateSelect.addEventListener('change', function() {
+            updateCities(this.value);
+        });
+        
+        // دالة لتحديث قائمة الدوائر
+        function updateCities(selectedState) {
+            // إفراغ قائمة الدوائر
+            citySelect.innerHTML = '<option value="">اختر الدائرة</option>';
+            
+            if (selectedState && algeriaStatesAndCities[selectedState]) {
+                // إضافة الدوائر المرتبطة بالولاية المختارة
+                algeriaStatesAndCities[selectedState].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}

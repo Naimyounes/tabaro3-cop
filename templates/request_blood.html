@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">طلب دم جديد</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('request_blood') }}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="blood_type" class="form-label">فصيلة الدم المطلوبة</label>
+                            <select class="form-select" id="blood_type" name="blood_type" required>
+                                <option value="">اختر فصيلة الدم</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="units_needed" class="form-label">عدد الوحدات المطلوبة</label>
+                            <input type="number" class="form-control" id="units_needed" name="units_needed" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="hospital" class="form-label">المستشفى</label>
+                            <input type="text" class="form-control" id="hospital" name="hospital" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="state" class="form-label">الولاية</label>
+                            <select class="form-select" id="state" name="state" required>
+                                <option value="">اختر الولاية</option>
+                                <!-- States will be populated by algeria_cities.js -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="city" class="form-label">الدائرة</label>
+                        <select class="form-select" id="city" name="city" required>
+                            <option value="" selected disabled>اختر الدائرة</option>
+                            <!-- Cities will be populated by algeria_cities.js -->
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="contact_phone" class="form-label">رقم الهاتف للتواصل</label>
+                        <input type="tel" class="form-control" id="contact_phone" name="contact_phone" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="details" class="form-label">تفاصيل إضافية</label>
+                        <textarea class="form-control" id="details" name="details" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_urgent" name="is_urgent">
+                        <label class="form-check-label" for="is_urgent">حالة طارئة</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-danger">إرسال الطلب</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h3 class="mb-0">معلومات مهمة</h3>
+            </div>
+            <div class="card-body">
+                <p>يرجى ملاحظة النقاط التالية عند طلب الدم:</p>
+                <ul>
+                    <li>تأكد من صحة المعلومات المدخلة، خاصة فصيلة الدم والمستشفى.</li>
+                    <li>سيتم عرض طلبك للمتبرعين المسجلين في النظام.</li>
+                    <li>في حالات الطوارئ، يرجى تحديد "حالة طارئة" لإعطاء الأولوية لطلبك.</li>
+                    <li>بمجرد تلبية الطلب، يرجى تحديثه من لوحة التحكم الخاصة بك.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/algeria_cities.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stateSelect = document.getElementById('state');
+        const citySelect = document.getElementById('city');
+        
+        // Clear any existing options first (except the first one)
+        while (stateSelect.options.length > 1) {
+            stateSelect.remove(1);
+        }
+        
+        // تعبئة قائمة الولايات
+        for (const state in algeriaStatesAndCities) {
+            const option = document.createElement('option');
+            option.value = state;
+            option.textContent = state;
+            stateSelect.appendChild(option);
+        }
+        
+        // تحديث قائمة الدوائر عند اختيار الولاية
+        stateSelect.addEventListener('change', function() {
+            // إفراغ قائمة الدوائر
+            citySelect.innerHTML = '<option value="" selected disabled>اختر الدائرة</option>';
+            
+            const selectedState = this.value;
+            if (selectedState && algeriaStatesAndCities[selectedState]) {
+                // إضافة الدوائر المرتبطة بالولاية المختارة
+                algeriaStatesAndCities[selectedState].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

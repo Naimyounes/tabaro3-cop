@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">معلوماتي الشخصية</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>الاسم:</strong> {{ user.full_name }}</p>
+                <p><strong>اسم المستخدم:</strong> {{ user.username }}</p>
+                <p><strong>البريد الإلكتروني:</strong> {{ user.email }}</p>
+                <p><strong>رقم الهاتف:</strong> {{ user.phone }}</p>
+                <p><strong>فصيلة الدم:</strong> {{ user.blood_type }}</p>
+                <p><strong>المدينة:</strong> {{ user.city }}</p>
+                <p><strong>الحالة:</strong> {% if user.is_donor %}متبرع{% else %}غير متبرع{% endif %}</p>
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">تعديل البيانات</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">طلباتي</h3>
+            </div>
+            <div class="card-body">
+                {% if requests %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>فصيلة الدم</th>
+                                <th>المدينة</th>
+                                <th>المستشفى</th>
+                                <th>الوحدات</th>
+                                <th>التاريخ</th>
+                                <th>الحالة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in requests %}
+                            <tr>
+                                <td>{{ request.blood_type }}</td>
+                                <td>{{ request.city }}</td>
+                                <td>{{ request.hospital }}</td>
+                                <td>{{ request.units_needed }}</td>
+                                <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if request.is_fulfilled %}
+                                    <span class="badge bg-success">تم التلبية</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">قيد الانتظار</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('view_request', request_id=request.id) }}" class="btn btn-sm btn-info">عرض</a>
+                                    {% if not request.is_fulfilled %}
+                                    <a href="{{ url_for('mark_fulfilled', request_id=request.id) }}" class="btn btn-sm btn-success">تم التلبية</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center">لا توجد طلبات حالياً</p>
+                <a href="{{ url_for('request_blood') }}" class="btn btn-danger">إنشاء طلب جديد</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">إحصائيات</h3>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 mb-3">
+                            <h4>عدد طلباتي</h4>
+                            <h2 class="text-danger">{{ requests|length }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 mb-3">
+                            <h4>الطلبات المكتملة</h4>
+                            <h2 class="text-success">{{ requests|selectattr('is_fulfilled', 'eq', true)|list|length }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 mb-3">
+                            <h4>الطلبات قيد الانتظار</h4>
+                            <h2 class="text-warning">{{ requests|selectattr('is_fulfilled', 'eq', false)|list|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a href="{{ url_for('request_blood') }}" class="btn btn-danger btn-lg">إنشاء طلب جديد</a>
+            {% if user.is_donor %}
+            <a href="#" class="btn btn-outline-danger btn-lg">إيقاف حالة التبرع مؤقتاً</a>
+            {% else %}
+            <a href="#" class="btn btn-outline-success btn-lg">تفعيل حالة التبرع</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
